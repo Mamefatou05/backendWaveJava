@@ -155,6 +155,13 @@
 			<version>5.5.13.2</version> <!-- Assurez-vous d'utiliser la version souhaitée -->
 		</dependency>
 
+
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.1.0</version> <!-- vérifiez la version compatible avec Spring Boot 3 -->
+		</dependency>
+
 		<!-- Apache POI -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
