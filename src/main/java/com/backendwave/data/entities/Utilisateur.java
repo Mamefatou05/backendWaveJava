@@ -26,7 +26,7 @@ public class Utilisateur extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String password;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String codeQr;
 
     @Column(precision = 15, scale = 2)
