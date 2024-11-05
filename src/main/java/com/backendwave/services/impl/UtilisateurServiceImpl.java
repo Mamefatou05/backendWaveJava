@@ -51,7 +51,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Override
     public List<Utilisateur> findByRoleId(Long roleId) {
-        return utilisateurRepository.findByRole_Id(roleId);
+        return utilisateurRepository.findByRoleId(roleId);
     }
 
     @Override
