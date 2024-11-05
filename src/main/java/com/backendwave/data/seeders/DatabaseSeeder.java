@@ -12,6 +12,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final UtilisateurSeeder utilisateurSeeder;
     private final PlafondSeeder plafondSeeder;
     private final PointAgentSeeder pointAgentSeeder;
+    private final TransactionSeeder transactionSeeder;
 
     @Override
     public void run(String... args) {
@@ -20,6 +21,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             utilisateurSeeder.seed();
             plafondSeeder.seed();
             pointAgentSeeder.seed();
+            transactionSeeder.seed();
         }
     }
 

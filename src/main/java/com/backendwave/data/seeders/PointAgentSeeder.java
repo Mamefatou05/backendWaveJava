@@ -19,12 +19,12 @@ public class PointAgentSeeder {
 
     public void seed() {
         if (pointAgentRepository.count() == 0) {
-            utilisateurRepository.findByRole_Id(
+            utilisateurRepository.findByRoleId(
                 roleRepository.findByNom("AGENT").orElseThrow().getId()
             ).forEach(agent -> {
                 createPointAgent(
                     agent,
-                    "Rue 123, Quartier Commerce, Abidjan",
+                    "Dakar, Senegal",
                     true,
                     new BigDecimal("5000000") // 5 millions de solde flottant initial
                 );

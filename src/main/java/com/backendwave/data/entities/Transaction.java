@@ -44,4 +44,7 @@ public class Transaction extends BaseEntity {
     @Column(length = 50)
     private String referenceGroupe;
 
+    @Column(precision = 7, scale = 2)
+    private BigDecimal fraisTransfert;
+
 }
