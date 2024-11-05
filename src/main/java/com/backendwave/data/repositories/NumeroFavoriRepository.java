@@ -13,4 +13,4 @@ public interface NumeroFavoriRepository extends BaseRepository<NumeroFavori> {
     
     // Trouver un numéro favori spécifique d'un client
     Optional<NumeroFavori> findByClientIdAndNumeroTelephone(Long clientId, String numeroTelephone);
-} 
+}

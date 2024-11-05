@@ -28,4 +28,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     
     // Trouver toutes les transactions d'un utilisateur (expéditeur ou destinataire)
     List<Transaction> findByExpediteur_IdOrDestinataire_Id(Long expediteurId, Long destinataireId);
-} 
+}
