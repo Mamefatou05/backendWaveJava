@@ -16,7 +16,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     Optional<Utilisateur> findByEmail(String email);
     
     // Recherche par rôle
-    List<Utilisateur> findByRoleId(Long roleId); 
+    List<Utilisateur> findByRole_Id(Long roleId);
     
     // Recherche des utilisateurs actifs
     List<Utilisateur> findByEstActifTrue();
@@ -26,5 +26,4 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     
     // Vérifier si un email existe
     boolean existsByEmail(String email);
-
-} 
+}

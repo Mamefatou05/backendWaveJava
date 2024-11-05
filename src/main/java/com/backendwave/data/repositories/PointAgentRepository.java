@@ -15,4 +15,4 @@ public interface PointAgentRepository extends JpaRepository<PointAgent, Long> {
     // Trouver par adresse (recherche exacte)
     Optional<PointAgent> findByAdresse(String adresse);
 
-} 
+}
