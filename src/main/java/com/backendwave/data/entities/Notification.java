@@ -1,7 +1,6 @@
 package com.backendwave.data.entities;
 
 import com.backendwave.data.enums.NotificationType;
-import com.backendwave.data.enums.TransactionType;
 import jakarta.persistence.*;
 
 import lombok.Data;
@@ -25,7 +24,7 @@ public class Notification extends BaseEntity {
     private Boolean estLue = false;
 
     @Enumerated(EnumType.STRING)
-    private TransactionType typeNotification;
+    private NotificationType typeNotification;
 
     // Getters and setters
 }

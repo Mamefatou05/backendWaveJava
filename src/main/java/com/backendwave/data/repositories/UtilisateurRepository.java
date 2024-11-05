@@ -8,22 +8,23 @@ import java.util.Optional;
 
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
-    
+
     // Recherche par numéro de téléphone
     Optional<Utilisateur> findByNumeroTelephone(String numeroTelephone);
-    
+
     // Recherche par email
     Optional<Utilisateur> findByEmail(String email);
-    
+
     // Recherche par rôle
-    List<Utilisateur> findByRole_Id(Long roleId);
-    
+    List<Utilisateur> findByRoleId(Long roleId);
+
     // Recherche des utilisateurs actifs
     List<Utilisateur> findByEstActifTrue();
-    
+
     // Vérifier si un numéro de téléphone existe
     boolean existsByNumeroTelephone(String numeroTelephone);
-    
+
     // Vérifier si un email existe
     boolean existsByEmail(String email);
+
 }

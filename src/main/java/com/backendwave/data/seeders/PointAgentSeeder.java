@@ -19,21 +19,21 @@ public class PointAgentSeeder {
 
     public void seed() {
         if (pointAgentRepository.count() == 0) {
-            utilisateurRepository.findByRole_Id(
-                roleRepository.findByNom("AGENT").orElseThrow().getId()
+            utilisateurRepository.findByRoleId(
+                    roleRepository.findByNom("AGENT").orElseThrow().getId()
             ).forEach(agent -> {
                 createPointAgent(
-                    agent,
-                    "Rue 123, Quartier Commerce, Abidjan",
-                    true,
-                    new BigDecimal("5000000") // 5 millions de solde flottant initial
+                        agent,
+                        "Dakar, Senegal",
+                        true,
+                        new BigDecimal("5000000") // 5 millions de solde flottant initial
                 );
             });
         }
     }
 
-    private void createPointAgent(Utilisateur agent, String adresse, 
-                                Boolean estActif, BigDecimal soldeFlottant) {
+    private void createPointAgent(Utilisateur agent, String adresse,
+                                  Boolean estActif, BigDecimal soldeFlottant) {
         PointAgent pointAgent = new PointAgent();
         pointAgent.setAgent(agent);
         pointAgent.setAdresse(adresse);

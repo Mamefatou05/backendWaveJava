@@ -1,23 +1,22 @@
 package com.backendwave.data.repositories;
 
 import com.backendwave.data.entities.CodeVerification;
+import com.backendwave.data.entities.Utilisateur;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDateTime;
+
 import java.util.Optional;
+import java.util.List;
 
 @Repository
-public interface CodeVerificationRepository extends BaseRepository<CodeVerification> {
-    
-    // Trouver un code par utilisateur et code qui n'est pas expiré et non utilisé
-    Optional<CodeVerification> findByUtilisateurIdAndCodeAndDateExpirationAfterAndEstUtiliseFalse(
-        Long utilisateurId, 
-        String code, 
-        LocalDateTime now
-    );
-    
-    // Trouver les codes actifs d'un utilisateur
-    Optional<CodeVerification> findByUtilisateurIdAndEstUtiliseFalseAndDateExpirationAfter(
-        Long utilisateurId, 
-        LocalDateTime now
-    );
+public interface CodeVerificationRepository extends JpaRepository<CodeVerification, Long> {
+
+    // Recherche par code et non utilisé
+    Optional<CodeVerification> findByCodeAndEstUtiliseFalse(String code);
+
+    // Recherche par utilisateur
+    List<CodeVerification> findByUtilisateur(Utilisateur utilisateur);
+
+    // Vérifier si un code existe et n'est pas utilisé
+    boolean existsByCodeAndEstUtiliseFalse(String code);
 } 
