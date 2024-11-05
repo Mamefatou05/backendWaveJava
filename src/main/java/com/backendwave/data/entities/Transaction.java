@@ -8,6 +8,11 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 public class Transaction extends BaseEntity {
 
@@ -38,5 +43,8 @@ public class Transaction extends BaseEntity {
 
     @Column(length = 50)
     private String referenceGroupe;
+
+    @Column(precision = 7, scale = 2)
+    private BigDecimal fraisTransfert;
 
 }
