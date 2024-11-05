@@ -1,12 +1,13 @@
 package com.backendwave.data.entities;
 
-import com.backendwave.data.enums.NotificationType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import com.backendwave.data.enums.NotificationType;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -23,9 +24,9 @@ public class Utilisateur extends BaseEntity {
     private String email;
 
     @Column(nullable = false, length = 255)
-    private String motDePasseHash;
+    private String password;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String codeQr;
 
     @Column(precision = 15, scale = 2)
@@ -37,7 +38,8 @@ public class Utilisateur extends BaseEntity {
 
     private Boolean estActif = false;
 
-    private NotificationType notificationType = NotificationType.EMAIL;
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType typeNotification = NotificationType.SMS;
 
 }

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface PlafondRepository extends JpaRepository<Plafond, Long> {
-    
+
     // Trouver le plafond par ID utilisateur
     Optional<Plafond> findByUtilisateur_Id(Long utilisateurId);
 
