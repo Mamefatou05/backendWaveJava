@@ -5,8 +5,13 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-public class NumeroFavori {
+public class NumeroFavori extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -3,12 +3,16 @@ package com.backendwave.data.entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 public class CodesVerification extends BaseEntity {
 

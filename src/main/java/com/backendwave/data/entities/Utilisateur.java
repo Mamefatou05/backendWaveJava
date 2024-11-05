@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 public class Utilisateur extends BaseEntity {
 
