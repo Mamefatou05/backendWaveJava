@@ -10,22 +10,22 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    
+
     // Trouver les transactions par expéditeur
     List<Transaction> findByExpediteur_Id(Long expediteurId);
-    
+
     // Trouver les transactions par destinataire
     List<Transaction> findByDestinataire_Id(Long destinataireId);
-    
+
     // Trouver par statut
     List<Transaction> findByStatut(TransactionStatus statut);
-    
+
     // Trouver les transactions planifiées à exécuter
     List<Transaction> findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(LocalDateTime dateTime);
-    
+
     // Trouver par type de transaction
     List<Transaction> findByTypeTransaction(TransactionType type);
-    
+
     // Trouver toutes les transactions d'un utilisateur (expéditeur ou destinataire)
     List<Transaction> findByExpediteur_IdOrDestinataire_Id(Long expediteurId, Long destinataireId);
 }

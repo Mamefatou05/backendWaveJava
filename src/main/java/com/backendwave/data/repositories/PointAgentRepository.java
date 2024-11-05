@@ -8,10 +8,10 @@ import java.util.Optional;
 
 @Repository
 public interface PointAgentRepository extends JpaRepository<PointAgent, Long> {
-    
+
     // Trouver tous les points agents actifs
     List<PointAgent> findByEstActifTrue();
-    
+
     // Trouver par adresse (recherche exacte)
     Optional<PointAgent> findByAdresse(String adresse);
 

@@ -7,10 +7,10 @@ import java.util.Optional;
 
 @Repository
 public interface NumeroFavoriRepository extends BaseRepository<NumeroFavori> {
-    
+
     // Trouver tous les numéros favoris d'un client
     List<NumeroFavori> findByClientId(Long clientId);
-    
+
     // Trouver un numéro favori spécifique d'un client
     Optional<NumeroFavori> findByClientIdAndNumeroTelephone(Long clientId, String numeroTelephone);
 }
