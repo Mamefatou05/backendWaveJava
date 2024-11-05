@@ -2,11 +2,13 @@ package com.backendwave.data.entities;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
