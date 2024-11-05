@@ -31,7 +31,7 @@ public class QRCodeGenerator {
                 250,  // largeur
                 250   // hauteur
             );
-
+            
             // Convertir le QR code en image PNG puis en Base64
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
