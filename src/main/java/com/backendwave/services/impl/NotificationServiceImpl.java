@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     // Envoyer une notification en fonction du type choisi par l'utilisateur
     public void sendNotification(Notification notification, Utilisateur utilisateur) {
-        NotificationType notificationType = utilisateur.getNotificationType(); // On suppose qu'il y a un attribut type de notification
+        NotificationType notificationType = utilisateur.getTypeNotification(); // On suppose qu'il y a un attribut type de notification
         switch (notificationType) {
             case SMS:
                 smsService.sendSms(utilisateur.getNumeroTelephone(), notification.getMessage());
