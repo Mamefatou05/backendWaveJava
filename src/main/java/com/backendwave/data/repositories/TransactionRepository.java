@@ -3,6 +3,7 @@ package com.backendwave.data.repositories;
 import com.backendwave.data.entities.Transaction;
 import com.backendwave.data.enums.TransactionStatus;
 import com.backendwave.data.enums.TransactionType;
+import com.backendwave.data.entities.Utilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
@@ -28,4 +29,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     // Trouver toutes les transactions d'un utilisateur (expéditeur ou destinataire)
     List<Transaction> findByExpediteur_IdOrDestinataire_Id(Long expediteurId, Long destinataireId);
+
+    // Trouver toutes les transactions d'un utilisateur (expéditeur ou destinataire) par numéro de téléphone
+    List<Transaction> findByExpediteurOrDestinataire(Utilisateur utilisateurExpediteur, Utilisateur utilisateurDestinataire);
 }

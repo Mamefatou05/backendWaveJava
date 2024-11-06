@@ -174,7 +174,7 @@
 		<dependency>
 			<groupId>jakarta.persistence</groupId>
 			<artifactId>jakarta.persistence-api</artifactId>
-			<version>3.1.0</version> <!-- vérifiez la version compatible avec Spring Boot 3 -->
+			<version>3.1.0</version> <!-- v��rifiez la version compatible avec Spring Boot 3 -->
 		</dependency>
 
 		<!-- Apache POI -->
@@ -199,6 +199,13 @@
 
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<encoding>UTF-8</encoding>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
