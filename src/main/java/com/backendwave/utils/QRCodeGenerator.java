@@ -20,26 +20,24 @@ public class QRCodeGenerator {
 
     public String generateQRCodeBase64(String telephone) {
         try {
-            // Créer le contenu du QR code - juste l'URL et le numéro de téléphone
-            String qrContent = frontendUrl + "\n" + telephone;
-            
+            // Créer l'URL complète avec le numéro de téléphone en paramètre
+            String completeUrl = String.format("%s/verify/%s", frontendUrl, telephone);
+
             // Configurer le générateur de QR code
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(
-                qrContent, 
-                BarcodeFormat.QR_CODE, 
-                250,  // largeur
-                250   // hauteur
-                
+                    completeUrl,  // Utiliser l'URL complète comme contenu
+                    BarcodeFormat.QR_CODE,
+                    250,  // largeur
+                    250   // hauteur
             );
-            
+
             // Convertir le QR code en image PNG puis en Base64
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
-            
-            // Retourner le QR code en format Base64 avec le préfixe data URL
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
-            
+
+            return Base64.getEncoder().encodeToString(outputStream.toByteArray());
+
         } catch (WriterException | IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Erreur lors de la génération du QR code", e);
