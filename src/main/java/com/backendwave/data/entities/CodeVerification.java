@@ -25,5 +25,6 @@ public class CodeVerification extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime dateExpiration;
 
+
     private Boolean estUtilise = false;
 }
