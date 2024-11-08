@@ -34,6 +34,4 @@ public class CreateClientDto {
    @NotBlank(message = "La confirmation du code PIN est obligatoire")
    private String confirmPassword;
 
-   @NotNull(message = "Le type de reception de notification est requis")
-   private NotificationType type ;
 }

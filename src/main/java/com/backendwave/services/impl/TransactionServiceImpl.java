@@ -314,78 +314,85 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     @Override
     public List<TransferResponseDto> multipleTransfer(MultipleTransferRequestDto requestDto) {
-        log.info("Début du traitement de transfert multiple depuis {} vers {} destinataires",
-                requestDto.getSenderPhoneNumber(), requestDto.getRecipientPhoneNumbers().size());
+        log.info("Début du traitement de transfert multiple depuis {} vers {} destinataires. Montant par destinataire: {}",
+                requestDto.getSenderPhoneNumber(),
+                requestDto.getRecipientPhoneNumbers().size(),
+                requestDto.getAmount());
 
-        transactionValidator.validateMultipleTransferRequest(requestDto);
+        try {
+            // Validation de la requête
+            log.info("Validation de la requête multiple...");
+            transactionValidator.validateMultipleTransferRequest(requestDto);
 
-        // Générer une référence de groupe si elle n'existe pas
-        String groupReference = requestDto.getGroupReference() != null ?
-                requestDto.getGroupReference() :
-                "MULTI_" + System.currentTimeMillis();
+            // Générer une référence de groupe
+            String groupReference = requestDto.getGroupReference() != null ?
+                    requestDto.getGroupReference() :
+                    "MULTI_" + System.currentTimeMillis();
+            log.info("Référence de groupe générée: {}", groupReference);
 
-        // Récupérer l'expéditeur avec verrou pessimiste
-        Utilisateur sender = utilisateurRepository.findByNumeroTelephoneForUpdate(requestDto.getSenderPhoneNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Expéditeur introuvable"));
+            // Récupérer l'expéditeur
+            Utilisateur sender = utilisateurRepository.findByNumeroTelephoneForUpdate(requestDto.getSenderPhoneNumber())
+                    .orElseThrow(() -> new IllegalArgumentException("Expéditeur introuvable"));
+            log.info("Expéditeur trouvé avec solde: {}", sender.getSolde());
 
-        // Calculer le montant total nécessaire
-        BigDecimal transferFeePerTransaction = calculateTransferFee(requestDto.getAmount());
-        BigDecimal totalFees = transferFeePerTransaction.multiply(
-                new BigDecimal(requestDto.getRecipientPhoneNumbers().size()));
-        BigDecimal totalAmount = requestDto.getAmount()
-                .multiply(new BigDecimal(requestDto.getRecipientPhoneNumbers().size()))
-                .add(totalFees);
+            // Calcul des montants
+            BigDecimal transferFeePerTransaction = calculateTransferFee(requestDto.getAmount());
+            BigDecimal totalFees = transferFeePerTransaction.multiply(
+                    new BigDecimal(requestDto.getRecipientPhoneNumbers().size()));
+            BigDecimal totalAmount = requestDto.getAmount()
+                    .multiply(new BigDecimal(requestDto.getRecipientPhoneNumbers().size()))
+                    .add(totalFees);
 
-        // Vérification initiale du solde total
-        if (sender.getSolde().compareTo(totalAmount) < 0) {
-            throw new IllegalArgumentException(String.format(
-                    "Solde insuffisant pour effectuer tous les transferts. Nécessaire: %s, Disponible: %s",
-                    totalAmount, sender.getSolde()));
-        }
+            log.info("Calculs effectués - Frais par transaction: {}, Total des frais: {}, Montant total: {}",
+                    transferFeePerTransaction, totalFees, totalAmount);
 
-        // Vérification des plafonds sur le montant total
-        Plafond plafond = plafondRepository.findByUtilisateur_Id(sender.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Plafond non défini pour l'utilisateur"));
-
-        plafondValidator.verifierMontantMaxTransaction(totalAmount, plafond);
-        plafondValidator.verifierLimiteJournaliere(totalAmount, sender, plafond);
-        plafondValidator.verifierLimiteMensuelle(totalAmount, sender, plafond);
-
-        List<TransferResponseDto> responses = new ArrayList<>();
-        List<String> failedRecipients = new ArrayList<>();
-
-        // Traiter chaque destinataire
-        for (String recipientPhone : requestDto.getRecipientPhoneNumbers()) {
-            try {
-                TransferRequestDto individualTransfer = TransferRequestDto.builder()
-                        .senderPhoneNumber(requestDto.getSenderPhoneNumber())
-                        .recipientPhoneNumber(recipientPhone)
-                        .amount(requestDto.getAmount())
-                        .groupReference(groupReference)  // Ajout de la référence de groupe
-                        .build();
-
-                TransferResponseDto response = transfer(individualTransfer);
-                responses.add(response);
-
-                log.info("Transfert réussi vers {}, ID transaction: {}",
-                        recipientPhone, response.getTransactionId());
-
-            } catch (Exception e) {
-                log.error("Échec du transfert vers {}: {}", recipientPhone, e.getMessage());
-                failedRecipients.add(recipientPhone);
+            // Vérification du solde
+            if (sender.getSolde().compareTo(totalAmount) < 0) {
+                throw new IllegalArgumentException(String.format(
+                        "Solde insuffisant pour effectuer tous les transferts. Nécessaire: %s, Disponible: %s",
+                        totalAmount, sender.getSolde()));
             }
-        }
 
-        // En cas d'échec partiel, on log mais on continue
-        if (!failedRecipients.isEmpty()) {
-            log.warn("Certains transferts ont échoué vers: {}", String.join(", ", failedRecipients));
-        }
+            // Traitement des transferts
+            List<TransferResponseDto> responses = new ArrayList<>();
+            List<String> failedRecipients = new ArrayList<>();
 
-        // Vérifier qu'au moins un transfert a réussi
-        if (responses.isEmpty()) {
-            throw new RuntimeException("Aucun transfert n'a réussi");
-        }
+            for (String recipientPhone : requestDto.getRecipientPhoneNumbers()) {
+                try {
+                    log.info("Traitement du transfert vers {}", recipientPhone);
 
-        return responses;
+                    TransferRequestDto individualTransfer = TransferRequestDto.builder()
+                            .senderPhoneNumber(requestDto.getSenderPhoneNumber())
+                            .recipientPhoneNumber(recipientPhone)
+                            .amount(requestDto.getAmount())
+                            .groupReference(groupReference)
+                            .build();
+
+                    TransferResponseDto response = transfer(individualTransfer);
+                    responses.add(response);
+                    log.info("Transfert réussi vers {}, ID transaction: {}",
+                            recipientPhone, response.getTransactionId());
+
+                } catch (Exception e) {
+                    log.error("Échec du transfert vers {}: {}", recipientPhone, e.getMessage(), e);
+                    failedRecipients.add(recipientPhone);
+                }
+            }
+
+            if (!failedRecipients.isEmpty()) {
+                log.warn("Échecs des transferts vers: {}", String.join(", ", failedRecipients));
+            }
+
+            if (responses.isEmpty()) {
+                throw new RuntimeException("Aucun transfert n'a réussi");
+            }
+
+            log.info("Transferts multiples terminés avec succès. Nombre de transferts réussis: {}", responses.size());
+            return responses;
+
+        } catch (Exception e) {
+            log.error("Erreur lors du traitement des transferts multiples", e);
+            throw e;
+        }
     }
 }
