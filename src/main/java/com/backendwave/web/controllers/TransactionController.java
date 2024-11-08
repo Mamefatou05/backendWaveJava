@@ -13,7 +13,7 @@ public interface TransactionController {
     List<TransferResponseDto> findBySenderPhoneNumber(String senderPhoneNumber);
     List<TransferResponseDto> findByRecipientPhoneNumber(String recipientPhoneNumber);
     List<TransferResponseDto> findByStatus(TransactionStatus status);
-    List<TransferResponseDto> findPlannedTransactions(LocalDateTime dateTime);
+  //  List<TransferResponseDto> findPlannedTransactions(LocalDateTime dateTime);
     List<TransferResponseDto> findByTransactionType(TransactionType type);
     List<TransferResponseDto> findByUserPhoneNumber(String phoneNumber);
 }

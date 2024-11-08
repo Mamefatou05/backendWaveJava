@@ -59,12 +59,12 @@ public class TransactionControllerImpl implements TransactionController {
         return transactionMapper.toDtoList(transactions);
     }
 
-    @GetMapping("/planned/{dateTime}")
-    @Override
-    public List<TransferResponseDto> findPlannedTransactions(@PathVariable LocalDateTime dateTime) {
-        List<Transaction> transactions = transactionService.findPlannedTransactions(dateTime);
-        return transactionMapper.toDtoList(transactions);
-    }
+   // @GetMapping("/planned/{dateTime}")
+  //  @Override
+   // public List<TransferResponseDto> findPlannedTransactions(@PathVariable LocalDateTime dateTime) {
+     //   List<Transaction> transactions = transactionService.findPlannedTransactions(dateTime);
+       // return transactionMapper.toDtoList(transactions);
+   // }
 
     @GetMapping("/type/{type}")
     @Override

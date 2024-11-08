@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/utilisateurs")
+@RequestMapping("/users")
 public class UtilisateurControllerImpl implements UtilisateurController {
 
    private final UtilisateurService utilisateurService;
@@ -24,7 +24,7 @@ public class UtilisateurControllerImpl implements UtilisateurController {
    }
 
    @Override
-   @PostMapping("/client")
+   @PostMapping("/register/client")
    public ResponseEntity<Utilisateur> createClient(@Valid @RequestBody CreateClientDto createClientDto) {
        try {
            Utilisateur client = utilisateurService.createClient(createClientDto);

@@ -17,7 +17,7 @@ public interface TransactionService {
     List<Transaction> findBySenderPhoneNumber(String senderPhoneNumber);
     List<Transaction> findByRecipientPhoneNumber(String recipientPhoneNumber);
     List<Transaction> findByStatut(TransactionStatus statut);
-    List<Transaction> findPlannedTransactions(LocalDateTime dateTime);
+   // List<Transaction> findPlannedTransactions(LocalDateTime dateTime);
     List<Transaction> findByTypeTransaction(TransactionType type);
     List<Transaction> findByUserPhoneNumber(String phoneNumber);
     TransferResponseDto transfer(TransferRequestDto requestDto);

@@ -1,5 +1,6 @@
 package com.backendwave.services.impl;
 
+import com.backendwave.data.entities.PlanificationTransfert;
 import com.backendwave.data.entities.Transaction;
 import com.backendwave.data.entities.Utilisateur;
 import com.backendwave.data.enums.TransactionStatus;
@@ -7,6 +8,7 @@ import com.backendwave.data.enums.TransactionType;
 import com.backendwave.data.repositories.TransactionRepository;
 import com.backendwave.data.repositories.UtilisateurRepository;
 import com.backendwave.services.TransactionService;
+import com.backendwave.web.dto.request.transactions.PlanificationTransfertDTO;
 import com.backendwave.web.dto.request.transactions.TransferRequestDto;
 import com.backendwave.web.dto.response.transactions.TransferResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +69,9 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByStatut(statut);
     }
 
-    @Override
-    public List<Transaction> findPlannedTransactions(LocalDateTime dateTime) {
-        return transactionRepository.findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(dateTime);
-    }
+   // public List<Transaction> findPlannedTransactions(LocalDateTime dateTime) {
+     //   return transactionRepository.findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(dateTime);
+    //}
 
     @Override
     public List<Transaction> findByTypeTransaction(TransactionType type) {
@@ -99,8 +100,6 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setMontant(transferRequestDto.getAmount());
         transaction.setTypeTransaction(TransactionType.TRANSFERT);
         transaction.setStatut(TransactionStatus.EN_ATTENTE);
-        transaction.setEstPlanifie(transferRequestDto.getPeriodicity() != null);
-        transaction.setPeriodicite(transferRequestDto.getPeriodicity());
         transaction.setReferenceGroupe(transferRequestDto.getGroupReference());
 
         // Calculer les frais de transfert (supposons 1% du montant)

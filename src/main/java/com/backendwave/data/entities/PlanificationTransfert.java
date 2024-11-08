@@ -1,25 +1,22 @@
 package com.backendwave.data.entities;
 
 import com.backendwave.data.enums.Periodicity;
-import com.backendwave.data.enums.TransactionStatus;
-import com.backendwave.data.enums.TransactionType;
 import jakarta.persistence.*;
-
+import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.time.LocalTime;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
-public class Transaction extends BaseEntity {
+public class PlanificationTransfert extends BaseEntity {
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Utilisateur expediteur;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Utilisateur destinataire;
 
     @Column(nullable = false, precision = 15, scale = 2)
@@ -27,16 +24,15 @@ public class Transaction extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType typeTransaction;
+    private Periodicity periodicite;
 
-    @Enumerated(EnumType.STRING)
-    private TransactionStatus statut = TransactionStatus.EN_ATTENTE;
+    @Column(nullable = false)
+    private LocalDateTime prochaineExecution;
 
+    private Boolean estActif = true;
 
-    @Column(length = 50)
     private String referenceGroupe;
+    private LocalTime heureExecution;  // Heure d'exécution de la planification
 
-    @Column(precision = 7, scale = 2)
-    private BigDecimal fraisTransfert;
 
 }

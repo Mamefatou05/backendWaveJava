@@ -22,7 +22,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByStatut(TransactionStatus statut);
 
     // Trouver les transactions planifiées à exécuter
-    List<Transaction> findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(LocalDateTime dateTime);
+   // List<Transaction> findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(LocalDateTime dateTime);
 
     // Trouver par type de transaction
     List<Transaction> findByTypeTransaction(TransactionType type);

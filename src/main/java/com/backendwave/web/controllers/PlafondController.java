@@ -1,4 +1,4 @@
-package com.backendwave.services;
+package com.backendwave.web.controllers;
 
 import com.backendwave.data.entities.Plafond;
 import com.backendwave.web.dto.request.transactions.PlafondRequestDto;
@@ -6,9 +6,9 @@ import com.backendwave.web.dto.request.transactions.PlafondRequestDto;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-public interface PlafondService {
+public interface PlafondController {
 
     Optional<Plafond> getPlafondByUtilisateurId(Long utilisateurId);
 
-    Plafond modifierPlafond(Long utilisateurId, PlafondRequestDto plafondRequestDto);
+    Plafond modifierPlafond(Long utilisateurId, PlafondRequestDto plafondRequest);
 }
