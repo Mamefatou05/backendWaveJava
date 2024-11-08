@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>com.mfn</groupId>
 			<artifactId>mydependance</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.5</version>
 		</dependency>
 
 		<dependency>
@@ -42,11 +42,6 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -199,13 +194,6 @@
 
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<encoding>UTF-8</encoding>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

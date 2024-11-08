@@ -1,5 +1,6 @@
 package com.backendwave.web.dto.request.users;
 
+import com.backendwave.data.enums.NotificationType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,4 +33,7 @@ public class CreateClientDto {
 
    @NotBlank(message = "La confirmation du code PIN est obligatoire")
    private String confirmPassword;
+
+   @NotNull(message = "Le type de reception de notification est requis")
+   private NotificationType type ;
 }

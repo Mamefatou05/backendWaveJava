@@ -1,14 +1,12 @@
-package com.backendwave.services;
+package com.backendwave.web.controllers;
 
 import com.backendwave.data.entities.NumeroFavori;
-import java.util.List;
-import java.util.Optional;
 
-public interface NumeroFavoriService {
+import java.util.List;
+
+public interface NumeroFavoriController {
 
     List<NumeroFavori> getAllNumerosFavoris(Long clientId);
-
-    Optional<NumeroFavori> getNumeroFavori(Long clientId, String numeroTelephone);
 
     NumeroFavori ajouterNumeroFavori(Long clientId, String numeroTelephone, String nom);
 

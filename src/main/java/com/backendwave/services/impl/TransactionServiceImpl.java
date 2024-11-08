@@ -3,30 +3,31 @@ package com.backendwave.services.impl;
 import com.backendwave.data.entities.Transaction;
 import com.backendwave.data.entities.Utilisateur;
 import com.backendwave.data.entities.Plafond;
-import com.backendwave.data.enums.Periodicity;
 import com.backendwave.data.enums.TransactionStatus;
 import com.backendwave.data.enums.TransactionType;
 import com.backendwave.data.repositories.TransactionRepository;
 import com.backendwave.data.repositories.UtilisateurRepository;
 import com.backendwave.data.repositories.PlafondRepository;
 import com.backendwave.services.TransactionService;
+import com.backendwave.validators.TransactionValidator;
+import com.backendwave.validators.PlafondValidator;
 import com.backendwave.web.dto.request.transactions.CancelTransactionRequestDto;
+import com.backendwave.web.dto.request.transactions.MultipleTransferRequestDto;
 import com.backendwave.web.dto.request.transactions.TransferRequestDto;
 import com.backendwave.web.dto.response.transactions.CancelTransactionResponseDto;
+import com.backendwave.web.dto.response.transactions.TransactionListDto;
 import com.backendwave.web.dto.response.transactions.TransferResponseDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,10 +37,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final PlafondRepository plafondRepository;
-
-    private static final Duration CANCELLATION_WINDOW = Duration.ofMinutes(30);
-    private static final String ROLE_ADMIN = "ADMIN";
-    private static final String ROLE_SUPPORT = "SUPPORT";
+    private final TransactionValidator transactionValidator;
+    private final PlafondValidator plafondValidator;
 
     @Override
     public Transaction save(Transaction transaction) {
@@ -82,11 +81,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> findPlannedTransactions(LocalDateTime dateTime) {
-        return transactionRepository.findByEstPlanifieTrueAndProchaineExecutionLessThanEqual(dateTime);
-    }
-
-    @Override
     public List<Transaction> findByTypeTransaction(TransactionType type) {
         return transactionRepository.findByTypeTransaction(type);
     }
@@ -104,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("Début du traitement de transfert pour l'expéditeur: {}", transferRequestDto.getSenderPhoneNumber());
 
         // Validation des données de la requête
-        validateTransferRequest(transferRequestDto);
+        transactionValidator.validateTransferRequest(transferRequestDto);
 
         // Récupération des utilisateurs
         Utilisateur sender = utilisateurRepository.findByNumeroTelephone(transferRequestDto.getSenderPhoneNumber())
@@ -117,28 +111,15 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal totalAmount = transferRequestDto.getAmount().add(transferFee);
 
         // Vérification du solde
-        if (sender.getSolde() == null || sender.getSolde().compareTo(totalAmount) < 0) {
-            String message = String.format(
-                    "Solde insuffisant. Solde actuel: %,.2f FCFA, " +
-                            "Montant demandé: %,.2f FCFA, " +
-                            "Frais: %,.2f FCFA, " +
-                            "Montant total nécessaire: %,.2f FCFA",
-                    sender.getSolde() != null ? sender.getSolde() : BigDecimal.ZERO,
-                    transferRequestDto.getAmount(),
-                    transferFee,
-                    totalAmount
-            );
-            log.error(message);
-            throw new IllegalArgumentException(message);
-        }
+        transactionValidator.validateSolde(sender.getSolde(), transferRequestDto.getAmount(), transferFee);
 
         // Récupération et vérification des plafonds
         Plafond plafond = plafondRepository.findByUtilisateur_Id(sender.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Plafond non défini pour l'utilisateur"));
 
-        verifierMontantMaxTransaction(transferRequestDto.getAmount(), plafond);
-        verifierLimiteJournaliere(transferRequestDto.getAmount(), sender, plafond);
-        verifierLimiteMensuelle(transferRequestDto.getAmount(), sender, plafond);
+        plafondValidator.verifierMontantMaxTransaction(transferRequestDto.getAmount(), plafond);
+        plafondValidator.verifierLimiteJournaliere(transferRequestDto.getAmount(), sender, plafond);
+        plafondValidator.verifierLimiteMensuelle(transferRequestDto.getAmount(), sender, plafond);
 
         // Création de la transaction
         Transaction transaction = createTransaction(transferRequestDto, sender, recipient, transferFee);
@@ -160,74 +141,11 @@ public class TransactionServiceImpl implements TransactionService {
         return createTransferResponse(savedTransaction, sender, recipient);
     }
 
-    private void validateTransferRequest(TransferRequestDto transferRequestDto) {
-        if (transferRequestDto.getAmount() == null || transferRequestDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Le montant du transfert doit être supérieur à zéro");
-        }
-        if (transferRequestDto.getSenderPhoneNumber().equals(transferRequestDto.getRecipientPhoneNumber())) {
-            throw new IllegalArgumentException("L'expéditeur et le destinataire ne peuvent pas être identiques");
-        }
-    }
-
     private BigDecimal calculateTransferFee(BigDecimal amount) {
         if (amount == null) {
             throw new IllegalArgumentException("Le montant ne peut pas être null");
         }
         return amount.multiply(new BigDecimal("0.01")).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private void verifierMontantMaxTransaction(BigDecimal montant, Plafond plafond) {
-        if (montant.compareTo(plafond.getMontantMaxTransaction()) > 0) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Le montant (%s) dépasse la limite maximale autorisée par transaction (%s)",
-                            montant, plafond.getMontantMaxTransaction()
-                    )
-            );
-        }
-    }
-
-    private void verifierLimiteJournaliere(BigDecimal montant, Utilisateur utilisateur, Plafond plafond) {
-        LocalDateTime debutJour = LocalDate.now().atStartOfDay();
-        LocalDateTime finJour = LocalDate.now().plusDays(1).atStartOfDay();
-
-        BigDecimal totalJournalier = transactionRepository
-                .findByExpediteur_IdAndDateCreationBetween(utilisateur.getId(), debutJour, finJour)
-                .stream()
-                .map(Transaction::getMontant)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (totalJournalier.add(montant).compareTo(plafond.getLimiteJournaliere()) > 0) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Le montant total des transactions journalières (%s) plus le montant actuel (%s) " +
-                                    "dépasse la limite journalière autorisée de %s",
-                            totalJournalier, montant, plafond.getLimiteJournaliere()
-                    )
-            );
-        }
-    }
-
-    private void verifierLimiteMensuelle(BigDecimal montant, Utilisateur utilisateur, Plafond plafond) {
-        YearMonth moisCourant = YearMonth.now();
-        LocalDateTime debutMois = moisCourant.atDay(1).atStartOfDay();
-        LocalDateTime finMois = moisCourant.atEndOfMonth().plusDays(1).atStartOfDay();
-
-        BigDecimal totalMensuel = transactionRepository
-                .findByExpediteur_IdAndDateCreationBetween(utilisateur.getId(), debutMois, finMois)
-                .stream()
-                .map(Transaction::getMontant)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (totalMensuel.add(montant).compareTo(plafond.getLimiteMensuelle()) > 0) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Le montant total des transactions mensuelles (%s) plus le montant actuel (%s) " +
-                                    "dépasse la limite mensuelle autorisée de %s",
-                            totalMensuel, montant, plafond.getLimiteMensuelle()
-                    )
-            );
-        }
     }
 
     private Transaction createTransaction(TransferRequestDto transferRequestDto,
@@ -238,16 +156,9 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setMontant(transferRequestDto.getAmount());
         transaction.setTypeTransaction(TransactionType.TRANSFERT);
         transaction.setStatut(TransactionStatus.EN_ATTENTE);
-        transaction.setEstPlanifie(transferRequestDto.isPlanned());
-        transaction.setPeriodicite(transferRequestDto.getPeriodicity());
         transaction.setReferenceGroupe(transferRequestDto.getGroupReference());
         transaction.setDateCreation(LocalDateTime.now());
         transaction.setFraisTransfert(transferFee);
-
-        if (transaction.getEstPlanifie()) {
-            transaction.setProchaineExecution(calculerProchaineExecution(transferRequestDto.getPeriodicity()));
-        }
-
         return transaction;
     }
 
@@ -275,7 +186,7 @@ public class TransactionServiceImpl implements TransactionService {
                         cancelRequest.getTransactionId()));
 
         // Vérifier si la transaction peut être annulée
-        validateCancellation(transaction);
+        transactionValidator.validateCancellation(transaction);
 
         // Récupérer l'expéditeur et le destinataire
         Utilisateur sender = transaction.getExpediteur();
@@ -287,11 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal totalAmount = transferAmount.add(transferFee);
 
         // Vérifier si le destinataire a suffisamment de fonds
-        if (recipient.getSolde().compareTo(transferAmount) < 0) {
-            throw new IllegalStateException(
-                    "Le destinataire n'a pas suffisamment de fonds pour permettre l'annulation du transfert"
-            );
-        }
+        transactionValidator.validateCancellationBalance(recipient, transferAmount);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -299,15 +206,15 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setStatut(TransactionStatus.ANNULE);
         transaction.setDateAnnulation(now);
         transaction.setMotifAnnulation(cancelRequest.getMotifAnnulation());
-        transactionRepository.save(transaction); // Sauvegarder la transaction annulée
+        transactionRepository.save(transaction);
 
         // Créer la transaction d'annulation
         Transaction cancellationTransaction = createCancellationTransaction(transaction, now);
-        transactionRepository.save(cancellationTransaction); // Sauvegarder la transaction d'annulation
+        transactionRepository.save(cancellationTransaction);
 
         // Mettre à jour les soldes
-        sender.setSolde(sender.getSolde().add(totalAmount)); // Rembourser l'expéditeur
-        recipient.setSolde(recipient.getSolde().subtract(transferAmount)); // Débiter le destinataire
+        sender.setSolde(sender.getSolde().add(totalAmount));
+        recipient.setSolde(recipient.getSolde().subtract(transferAmount));
 
         utilisateurRepository.save(sender);
         utilisateurRepository.save(recipient);
@@ -318,60 +225,33 @@ public class TransactionServiceImpl implements TransactionService {
         return createCancellationResponse(transaction, cancellationTransaction, sender, recipient);
     }
 
-    private void validateCancellation(Transaction transaction) {
-        // Vérifier le statut
-        if (TransactionStatus.ANNULE.equals(transaction.getStatut())) {
-            throw new IllegalStateException("Cette transaction a déjà été annulée");
-        }
-
-        if (!TransactionStatus.COMPLETE.equals(transaction.getStatut())) {
-            throw new IllegalStateException("Seules les transactions complétées peuvent être annulées");
-        }
-
-        // Vérifier le délai de 30 minutes
-        LocalDateTime now = LocalDateTime.now();
-        Duration timeSinceTransaction = Duration.between(transaction.getDateCreation(), now);
-
-        if (timeSinceTransaction.compareTo(CANCELLATION_WINDOW) > 0) {
-            throw new IllegalStateException(
-                    String.format("Le délai d'annulation de 30 minutes est dépassé. " +
-                                    "Temps écoulé depuis la transaction: %d minutes",
-                            timeSinceTransaction.toMinutes())
-            );
-        }
-    }
     private Transaction createCancellationTransaction(Transaction originalTransaction, LocalDateTime now) {
         Transaction cancellationTransaction = new Transaction();
-    
+
         cancellationTransaction.setExpediteur(originalTransaction.getDestinataire());
         cancellationTransaction.setDestinataire(originalTransaction.getExpediteur());
         cancellationTransaction.setMontant(originalTransaction.getMontant());
-        // Correction ici : utilisation de ANNULE au lieu de ANNULATION
         cancellationTransaction.setTypeTransaction(TransactionType.ANNULE);
         cancellationTransaction.setStatut(TransactionStatus.COMPLETE);
         cancellationTransaction.setDateCreation(now);
         cancellationTransaction.setTransactionOrigine(originalTransaction);
         cancellationTransaction.setFraisTransfert(BigDecimal.ZERO);
         cancellationTransaction.setMotifAnnulation(originalTransaction.getMotifAnnulation());
-    
-        // Ajout de validation avant le retour
-        if (cancellationTransaction.getTypeTransaction() == null) {
-            throw new IllegalStateException("Le type de transaction ne peut pas être null");
-        }
-        
+
         // Validation des champs obligatoires
-        if (cancellationTransaction.getExpediteur() == null || 
-            cancellationTransaction.getDestinataire() == null ||
-            cancellationTransaction.getMontant() == null) {
+        if (cancellationTransaction.getExpediteur() == null ||
+                cancellationTransaction.getDestinataire() == null ||
+                cancellationTransaction.getMontant() == null ||
+                cancellationTransaction.getTypeTransaction() == null) {
             throw new IllegalStateException("Les champs obligatoires ne peuvent pas être null");
         }
-    
+
         log.debug("Création de la transaction d'annulation : type={}, montant={}, expéditeur={}, destinataire={}",
-            cancellationTransaction.getTypeTransaction(),
-            cancellationTransaction.getMontant(),
-            cancellationTransaction.getExpediteur().getId(),
-            cancellationTransaction.getDestinataire().getId());
-    
+                cancellationTransaction.getTypeTransaction(),
+                cancellationTransaction.getMontant(),
+                cancellationTransaction.getExpediteur().getId(),
+                cancellationTransaction.getDestinataire().getId());
+
         return cancellationTransaction;
     }
 
@@ -395,14 +275,117 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    private LocalDateTime calculerProchaineExecution(Periodicity periodicity) {
-        if (periodicity == null) return null;
+    @Override
+    public List<TransactionListDto> getUserTransactions(Long userId, TransactionType type) {
+        log.info("Récupération des transactions pour l'utilisateur {} avec filtre: {}", userId, type);
 
-        LocalDateTime now = LocalDateTime.now();
-        return switch (periodicity) {
-            case JOURNALIER -> now.plusDays(1);
-            case HEBDOMADAIRE -> now.plusWeeks(1);
-            case MENSUEL -> now.plusMonths(1);
-        };
+        List<Transaction> transactions = transactionRepository.findUserTransactionsWithFilter(userId, type);
+
+        return transactions.stream()
+                .map(transaction -> convertToListDto(transaction, userId))
+                .collect(Collectors.toList());
+    }
+
+    private TransactionListDto convertToListDto(Transaction transaction, Long connectedUserId) {
+        boolean estEmetteur = transaction.getExpediteur().getId().equals(connectedUserId);
+        String autrePartiePrenante;
+
+        if (transaction.getTypeTransaction() == TransactionType.TRANSFERT) {
+            // Pour les transferts, on montre l'autre partie (expéditeur ou destinataire)
+            autrePartiePrenante = estEmetteur ?
+                    transaction.getDestinataire().getNomComplet() :
+                    transaction.getExpediteur().getNomComplet();
+        } else {
+            // Pour les autres types (DEPOT, RETRAIT, etc.)
+            autrePartiePrenante = "Wave"; // ou le nom de votre service
+        }
+
+        return TransactionListDto.builder()
+                .id(transaction.getId())
+                .montant(transaction.getMontant())
+                .typeTransaction(transaction.getTypeTransaction())
+                .statut(transaction.getStatut())
+                .dateCreation(transaction.getDateCreation())
+                .autrePartiePrenante(autrePartiePrenante)
+                .estEmetteur(estEmetteur)
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public List<TransferResponseDto> multipleTransfer(MultipleTransferRequestDto requestDto) {
+        log.info("Début du traitement de transfert multiple depuis {} vers {} destinataires",
+                requestDto.getSenderPhoneNumber(), requestDto.getRecipientPhoneNumbers().size());
+
+        transactionValidator.validateMultipleTransferRequest(requestDto);
+
+        // Générer une référence de groupe si elle n'existe pas
+        String groupReference = requestDto.getGroupReference() != null ?
+                requestDto.getGroupReference() :
+                "MULTI_" + System.currentTimeMillis();
+
+        // Récupérer l'expéditeur avec verrou pessimiste
+        Utilisateur sender = utilisateurRepository.findByNumeroTelephoneForUpdate(requestDto.getSenderPhoneNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Expéditeur introuvable"));
+
+        // Calculer le montant total nécessaire
+        BigDecimal transferFeePerTransaction = calculateTransferFee(requestDto.getAmount());
+        BigDecimal totalFees = transferFeePerTransaction.multiply(
+                new BigDecimal(requestDto.getRecipientPhoneNumbers().size()));
+        BigDecimal totalAmount = requestDto.getAmount()
+                .multiply(new BigDecimal(requestDto.getRecipientPhoneNumbers().size()))
+                .add(totalFees);
+
+        // Vérification initiale du solde total
+        if (sender.getSolde().compareTo(totalAmount) < 0) {
+            throw new IllegalArgumentException(String.format(
+                    "Solde insuffisant pour effectuer tous les transferts. Nécessaire: %s, Disponible: %s",
+                    totalAmount, sender.getSolde()));
+        }
+
+        // Vérification des plafonds sur le montant total
+        Plafond plafond = plafondRepository.findByUtilisateur_Id(sender.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Plafond non défini pour l'utilisateur"));
+
+        plafondValidator.verifierMontantMaxTransaction(totalAmount, plafond);
+        plafondValidator.verifierLimiteJournaliere(totalAmount, sender, plafond);
+        plafondValidator.verifierLimiteMensuelle(totalAmount, sender, plafond);
+
+        List<TransferResponseDto> responses = new ArrayList<>();
+        List<String> failedRecipients = new ArrayList<>();
+
+        // Traiter chaque destinataire
+        for (String recipientPhone : requestDto.getRecipientPhoneNumbers()) {
+            try {
+                TransferRequestDto individualTransfer = TransferRequestDto.builder()
+                        .senderPhoneNumber(requestDto.getSenderPhoneNumber())
+                        .recipientPhoneNumber(recipientPhone)
+                        .amount(requestDto.getAmount())
+                        .groupReference(groupReference)  // Ajout de la référence de groupe
+                        .build();
+
+                TransferResponseDto response = transfer(individualTransfer);
+                responses.add(response);
+
+                log.info("Transfert réussi vers {}, ID transaction: {}",
+                        recipientPhone, response.getTransactionId());
+
+            } catch (Exception e) {
+                log.error("Échec du transfert vers {}: {}", recipientPhone, e.getMessage());
+                failedRecipients.add(recipientPhone);
+            }
+        }
+
+        // En cas d'échec partiel, on log mais on continue
+        if (!failedRecipients.isEmpty()) {
+            log.warn("Certains transferts ont échoué vers: {}", String.join(", ", failedRecipients));
+        }
+
+        // Vérifier qu'au moins un transfert a réussi
+        if (responses.isEmpty()) {
+            throw new RuntimeException("Aucun transfert n'a réussi");
+        }
+
+        return responses;
     }
 }

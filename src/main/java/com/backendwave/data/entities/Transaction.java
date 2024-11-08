@@ -16,11 +16,9 @@ import java.time.LocalDateTime;
 public class Transaction extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "expediteur_id")
     private Utilisateur expediteur;
 
     @ManyToOne
-    @JoinColumn(name = "destinataire_id")
     private Utilisateur destinataire;
 
     @Column(nullable = false, precision = 15, scale = 2)
@@ -30,15 +28,11 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false)
     private TransactionType typeTransaction;
 
+//    private Boolean estPlanifie = false;
+
     @Enumerated(EnumType.STRING)
     private TransactionStatus statut = TransactionStatus.EN_ATTENTE;
 
-    private Boolean estPlanifie = false;
-
-    @Enumerated(EnumType.STRING)
-    private Periodicity periodicite;
-
-    private LocalDateTime prochaineExecution;
 
     @Column(length = 50)
     private String referenceGroupe;

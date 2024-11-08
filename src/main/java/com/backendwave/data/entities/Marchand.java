@@ -20,6 +20,5 @@ public class Marchand extends BaseEntity {
     private boolean estActif = true;
 
     @OneToOne
-    @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 }

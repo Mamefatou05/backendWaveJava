@@ -47,7 +47,6 @@ public class TransactionSeeder {
 
                 transaction.setExpediteur(client);
                 transaction.setDestinataire(agent);
-                transaction.setProchaineExecution(LocalDateTime.now().minusDays(random.nextInt(30)));
                 transaction.setFraisTransfert(montant.multiply(new BigDecimal("0.01"))); // 1% de frais
                 transaction.setStatut(TransactionStatus.COMPLETE);
 
