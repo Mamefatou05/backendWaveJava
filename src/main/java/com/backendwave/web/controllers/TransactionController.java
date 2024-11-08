@@ -2,7 +2,9 @@ package com.backendwave.web.controllers;
 
 import com.backendwave.data.enums.TransactionStatus;
 import com.backendwave.data.enums.TransactionType;
+import com.backendwave.web.dto.request.transactions.CancelTransactionRequestDto;
 import com.backendwave.web.dto.request.transactions.TransferRequestDto;
+import com.backendwave.web.dto.response.transactions.CancelTransactionResponseDto;
 import com.backendwave.web.dto.response.transactions.TransferResponseDto;
 
 import java.time.LocalDateTime;
@@ -16,4 +18,6 @@ public interface TransactionController {
     List<TransferResponseDto> findPlannedTransactions(LocalDateTime dateTime);
     List<TransferResponseDto> findByTransactionType(TransactionType type);
     List<TransferResponseDto> findByUserPhoneNumber(String phoneNumber);
+    CancelTransactionResponseDto cancelTransfer(CancelTransactionRequestDto cancelRequest);
+
 }

@@ -6,7 +6,9 @@ import com.backendwave.data.enums.TransactionType;
 import com.backendwave.services.TransactionService;
 import com.backendwave.web.controllers.TransactionController;
 import com.backendwave.web.dto.mappers.TransactionMapper;
+import com.backendwave.web.dto.request.transactions.CancelTransactionRequestDto;
 import com.backendwave.web.dto.request.transactions.TransferRequestDto;
+import com.backendwave.web.dto.response.transactions.CancelTransactionResponseDto;
 import com.backendwave.web.dto.response.transactions.TransferResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -79,4 +81,9 @@ public class TransactionControllerImpl implements TransactionController {
         List<Transaction> transactions = transactionService.findByUserPhoneNumber(phoneNumber);
         return transactionMapper.toDtoList(transactions);
     }
-}
+
+    @PostMapping("/cancel")
+    public CancelTransactionResponseDto cancelTransfer(@RequestBody CancelTransactionRequestDto cancelRequest) {
+        return transactionService.cancelTransfer(cancelRequest);
+    }
+}   

@@ -40,6 +40,6 @@ public class Utilisateur extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationType typeNotification = NotificationType.SMS;
+    private NotificationType typeNotification = NotificationType.EMAIL;
 
 }
