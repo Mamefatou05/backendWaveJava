@@ -31,4 +31,7 @@ public interface TransactionController {
     CancelTransactionResponseDto cancelTransfer(@RequestBody CancelTransactionRequestDto cancelRequest);
 
     ResponseEntity<List<TransactionListDto>> getMyTransactions(@RequestParam(required = false) TransactionType type);
+
+    ResponseEntity<TransferResponseDto> findById(@PathVariable Long id);
+
 }

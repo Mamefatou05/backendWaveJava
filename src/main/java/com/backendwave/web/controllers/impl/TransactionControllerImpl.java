@@ -15,7 +15,6 @@ import com.backendwave.web.dto.response.transactions.CancelTransactionResponseDt
 import com.backendwave.web.dto.response.transactions.TransferResponseDto;
 import com.backendwave.web.dto.response.transactions.TransactionListDto;
 import com.mfn.mydependance.exceptions.ResponseStatusException;
-import io.swagger.annotations.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,9 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -45,6 +42,27 @@ public class TransactionControllerImpl implements TransactionController {
         this.transactionMapper = transactionMapper;
         this.utilisateurRepository = utilisateurRepository;
     }
+
+    @GetMapping("/{id}")
+    @Override
+    public ResponseEntity<TransferResponseDto> findById(@PathVariable Long id) {
+        log.info("Tentative de récupération de la transaction avec l'ID: {}", id);
+        try {
+            Transaction transaction = transactionService.findById(id);
+            log.info("Transaction récupérée avec succès: {}", transaction);
+            TransferResponseDto transactionDto = transactionMapper.toDto(transaction);
+            return ResponseEntity.ok(transactionDto);
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la récupération de la transaction: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de la récupération de la transaction: ", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur inattendue s'est produite");
+        }
+    }
+
+
+
 
     private Utilisateur getConnectedUser() {
         try {
