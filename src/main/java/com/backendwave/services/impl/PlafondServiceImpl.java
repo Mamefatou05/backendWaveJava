@@ -1,6 +1,7 @@
 package com.backendwave.services.impl;
 
 import com.backendwave.data.entities.Plafond;
+import com.backendwave.data.entities.Utilisateur;
 import com.backendwave.data.repositories.PlafondRepository;
 import com.backendwave.services.PlafondService;
 import com.backendwave.web.dto.request.transactions.PlafondRequestDto;
@@ -16,6 +17,24 @@ import java.util.Optional;
 public class PlafondServiceImpl implements PlafondService {
 
     private final PlafondRepository plafondRepository;
+
+
+    public Plafond createDefaultPlafond(Utilisateur utilisateur) {
+        Plafond plafond = new Plafond();
+        plafond.setUtilisateur(utilisateur);
+
+        // Définir les limites par défaut
+        plafond.setLimiteJournaliere(new BigDecimal("1000000")); // 1 million par jour
+        plafond.setLimiteMensuelle(new BigDecimal("20000000")); // 20 millions par mois
+        plafond.setMontantMaxTransaction(new BigDecimal("500000")); // 500 mille par transaction
+
+        return plafondRepository.save(plafond);
+    }
+
+    // @Override
+    // public Optional<Plafond> findByUtilisateurId(Long utilisateurId) {
+    //     return plafondRepository.findByUtilisateur_Id(utilisateurId);
+    // }
 
     @Autowired
     public PlafondServiceImpl(PlafondRepository plafondRepository) {

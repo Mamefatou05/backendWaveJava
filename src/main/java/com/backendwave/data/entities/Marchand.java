@@ -1,5 +1,6 @@
 package com.backendwave.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,5 +21,6 @@ public class Marchand extends BaseEntity {
     private boolean estActif = true;
 
     @OneToOne
+    @JsonBackReference
     private Utilisateur utilisateur;
 }

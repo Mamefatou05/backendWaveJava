@@ -3,13 +3,13 @@ package com.backendwave.data.entities;
 import com.backendwave.data.enums.Periodicity;
 import com.backendwave.data.enums.TransactionStatus;
 import com.backendwave.data.enums.TransactionType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,9 +17,11 @@ import lombok.EqualsAndHashCode;
 public class Transaction extends BaseEntity {
 
     @ManyToOne
+    @JsonBackReference
     private Utilisateur expediteur;
 
     @ManyToOne
+    @JsonBackReference
     private Utilisateur destinataire;
 
     @Column(nullable = false, precision = 15, scale = 2)
@@ -28,6 +30,8 @@ public class Transaction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType typeTransaction;
+
+//    private Boolean estPlanifie = false;
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus statut = TransactionStatus.EN_ATTENTE;
@@ -39,4 +43,12 @@ public class Transaction extends BaseEntity {
     @Column(precision = 7, scale = 2)
     private BigDecimal fraisTransfert;
 
+    @ManyToOne
+    @JoinColumn(name = "transaction_origine_id")
+    private Transaction transactionOrigine;
+
+    private LocalDateTime dateAnnulation;
+
+    @Column(length = 255)
+    private String motifAnnulation;
 }

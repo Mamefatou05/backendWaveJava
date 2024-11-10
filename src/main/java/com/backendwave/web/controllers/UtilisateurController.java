@@ -4,6 +4,8 @@ import com.backendwave.data.entities.Utilisateur;
 import com.backendwave.web.dto.request.users.CreateClientDto;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -18,7 +20,7 @@ public interface UtilisateurController {
     List<Utilisateur> getUsersByRoleId(Long roleId);
     List<Utilisateur> getActiveUsers();
 
-    ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String authHeader);
+    ResponseEntity<?> getUserProfile(HttpServletRequest request);
     // Nouvelle méthode pour la création spécifique d'un client
     ResponseEntity<Utilisateur> createClient(CreateClientDto createClientDto);
 }

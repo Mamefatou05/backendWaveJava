@@ -1,5 +1,6 @@
 package com.backendwave.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ public class PointAgent extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "agent_id", nullable = false)
+    @JsonBackReference
     private Utilisateur agent;
 
     @Column(nullable = false, length = 255)

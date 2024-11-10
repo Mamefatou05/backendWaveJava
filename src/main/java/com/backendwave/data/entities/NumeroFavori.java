@@ -1,6 +1,7 @@
 package com.backendwave.data.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class NumeroFavori extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
+    @JsonBackReference
     private Utilisateur client;
 
     @Column(nullable = false, length = 15)

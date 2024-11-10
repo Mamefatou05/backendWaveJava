@@ -26,7 +26,7 @@ public class CreateClientDto {
 
    @NotBlank(message = "Le code PIN est obligatoire")
    @Pattern(
-       regexp = "^(?!.*(\\d)\\1)(?!0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)\\d{4}$",
+       regexp = "^(?!.*(\\d)\\1)(?!0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|54 32|4321|3210)\\d{4}$",
        message = "Le code PIN doit contenir exactement 4 chiffres non successifs et non répétitifs"
    )
    private String password;
@@ -34,6 +34,4 @@ public class CreateClientDto {
    @NotBlank(message = "La confirmation du code PIN est obligatoire")
    private String confirmPassword;
 
-   @NotNull(message = "Le type de reception de notification est requis")
-   private NotificationType type ;
 }
