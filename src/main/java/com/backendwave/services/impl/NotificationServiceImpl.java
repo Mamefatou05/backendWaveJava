@@ -8,6 +8,7 @@ import com.backendwave.services.EmailService;
 import com.backendwave.services.NotificationService;
 import com.backendwave.services.SmsService;
 import com.backendwave.services.WhatsappService;
+import com.backendwave.web.controllers.impl.NotificationWebSocketController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +21,27 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
     private final SmsService smsService;
     private final WhatsappService whatsappService;
+    private final NotificationWebSocketController notificationWebSocketController;
 
     @Autowired
     public NotificationServiceImpl(
             NotificationRepository notificationRepository,
             EmailService emailService,
             SmsService smsService,
-            WhatsappService whatsappService) {
+            WhatsappService whatsappService,
+            NotificationWebSocketController notificationWebSocketController) {
         this.notificationRepository = notificationRepository;
         this.emailService = emailService;
         this.smsService = smsService;
         this.whatsappService = whatsappService;
+        this.notificationWebSocketController = notificationWebSocketController;
     }
 
-    // Enregistrer une notification
     public Notification create(Notification notification, Utilisateur utilisateur) {
         notification.setUtilisateur(utilisateur);
-        return notificationRepository.save(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+        notificationWebSocketController.sendNotification(utilisateur.getId(), savedNotification); // Envoyer via WebSocket
+        return savedNotification;
     }
 
     // Envoyer une notification en fonction du type choisi par l'utilisateur

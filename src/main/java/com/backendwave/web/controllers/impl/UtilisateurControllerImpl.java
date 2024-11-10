@@ -6,6 +6,7 @@ import com.backendwave.services.UtilisateurService;
 import com.backendwave.web.dto.request.users.CreateClientDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,4 +84,20 @@ public class UtilisateurControllerImpl implements UtilisateurController {
    public List<Utilisateur> getActiveUsers() {
        return utilisateurService.findActiveUsers();
    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String authHeader) {
+        // Extraire le token du header Authorization
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7); // Enlever "Bearer "
+            try {
+                Utilisateur currentUser = utilisateurService.getCurrentUser(token);
+                return ResponseEntity.ok(currentUser);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token invalide");
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token manquant");
+    }
 }

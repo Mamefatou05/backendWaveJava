@@ -5,6 +5,7 @@ import com.backendwave.web.dto.request.users.CreateClientDto;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 public interface UtilisateurController {
     // Méthodes existantes
@@ -17,6 +18,7 @@ public interface UtilisateurController {
     List<Utilisateur> getUsersByRoleId(Long roleId);
     List<Utilisateur> getActiveUsers();
 
+    ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String authHeader);
     // Nouvelle méthode pour la création spécifique d'un client
     ResponseEntity<Utilisateur> createClient(CreateClientDto createClientDto);
 }

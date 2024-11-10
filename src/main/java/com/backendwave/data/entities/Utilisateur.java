@@ -42,4 +42,6 @@ public class Utilisateur extends BaseEntity {
     @Column(nullable = false)
     private NotificationType typeNotification = NotificationType.SMS;
 
+    
+
 }

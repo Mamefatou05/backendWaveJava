@@ -1,0 +1,41 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+
+import 'src/providers/AuthProvider.dart';
+import 'src/repositories/ApiRepository.dart';
+import 'src/routes/routes.dart'; // Assurez-vous d'importer le fichier central des routes
+import 'src/services/AuthService.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        // Fournisseur AuthProvider avec AuthService et ApiRepository
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider(
+            AuthService(
+              apiRepository: ApiRepository(),
+              storage: FlutterSecureStorage(),
+            ),
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'SenCash App', // Nom de l'application
+        theme: ThemeData(
+          primarySwatch: Colors.blue, // Couleur principale de l'application
+        ),
+        initialRoute: AppRoutes.initialRoute, // Définissez ici la route initiale
+        routes: AppRoutes.getRoutes(), // Récupérez les routes depuis AppRoutes
+      ),
+    );
+  }
+}

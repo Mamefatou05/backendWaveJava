@@ -19,15 +19,15 @@ public class PlanificationScheduler {
     private PlanificationTransfertRepository planificationRepository;
 
     // Exemple : exécution quotidienne
-    @Scheduled(cron = "*/1 * * * * ?")
-    public void executeScheduledTransactions() {
-        System.out.println("azerty dans je scheduledTransactions");
-        System.out.printf(String.valueOf(LocalDateTime.now()));
-
-        List<PlanificationTransfert> planifications = planificationRepository.findByProchaineExecutionBeforeAndEstActif(LocalDateTime.now());
-        System.out.printf(planifications.toString());
-        for (PlanificationTransfert planification : planifications) {
-            planificationTransfertService.traiterPlanification(planification);
-        }
-    }
+//    @Scheduled(cron = "*/50 * * * * ?")
+//    public void executeScheduledTransactions() {
+//        System.out.println("azerty dans je scheduledTransactions");
+//        System.out.printf(String.valueOf(LocalDateTime.now()));
+//
+//        List<PlanificationTransfert> planifications = planificationRepository.findByProchaineExecutionBeforeAndEstActif(LocalDateTime.now());
+//        System.out.printf(planifications.toString());
+//        for (PlanificationTransfert planification : planifications) {
+//            planificationTransfertService.traiterPlanification(planification);
+//        }
+//    }
 }

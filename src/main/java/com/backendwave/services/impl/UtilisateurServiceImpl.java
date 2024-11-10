@@ -8,6 +8,7 @@ import com.backendwave.services.UtilisateurService;
 import com.backendwave.utils.QRCodeGenerator;
 import com.backendwave.web.dto.request.users.CreateClientDto;
 import com.backendwave.services.EmailService;
+import com.mfn.mydependance.services.TokenService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,18 @@ public class UtilisateurServiceImpl implements UtilisateurService {
    private final PasswordEncoder passwordEncoder;
    private final QRCodeGenerator qrCodeGenerator;
    private final EmailService emailService;
+
+    private final TokenService tokenService;
+
+    @Override
+    public Utilisateur getCurrentUser(String token) {
+        // Récupérer l'email depuis le token
+        String email = tokenService.getUsernameFromJWT(token);
+
+        // Rechercher l'utilisateur par email
+        return utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
 
    @Override
    public Utilisateur createClient(CreateClientDto createClientDto) throws IllegalArgumentException {

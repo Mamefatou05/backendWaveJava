@@ -14,14 +14,12 @@ import com.backendwave.services.NotificationService;
 import com.backendwave.services.PlanificationTransfertService;
 import com.backendwave.web.dto.request.transactions.PlanificationTransfertDTO;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Slf4j
 @Service
 public class PlanificationTransfertServiceImpl implements PlanificationTransfertService {
 

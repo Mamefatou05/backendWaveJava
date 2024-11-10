@@ -17,6 +17,7 @@ public interface UtilisateurService {
     List<Utilisateur> findActiveUsers();
     boolean existsByNumeroTelephone(String numeroTelephone);
     boolean existsByEmail(String email);
+    Utilisateur getCurrentUser(String token);
 
     // Nouvelle méthode pour créer un client
     Utilisateur createClient(CreateClientDto createClientDto) throws IllegalArgumentException;
