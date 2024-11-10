@@ -202,29 +202,35 @@ public class TransactionServiceImpl implements TransactionService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Mettre à jour la transaction originale
-        transaction.setStatut(TransactionStatus.ANNULE);
-        transaction.setDateAnnulation(now);
-        transaction.setMotifAnnulation(cancelRequest.getMotifAnnulation());
-        transactionRepository.save(transaction);
-
-        // Créer la transaction d'annulation
-        Transaction cancellationTransaction = createCancellationTransaction(transaction, now);
-        transactionRepository.save(cancellationTransaction);
-
-        // Mettre à jour les soldes
+        // Mettre à jour les soldes avant la suppression
         sender.setSolde(sender.getSolde().add(totalAmount));
         recipient.setSolde(recipient.getSolde().subtract(transferAmount));
 
+        // Sauvegarder les utilisateurs avec leurs nouveaux soldes
         utilisateurRepository.save(sender);
         utilisateurRepository.save(recipient);
 
-        log.info("Transfert annulé avec succès, ID de transaction: {}, ID transaction d'annulation: {}",
-                transaction.getId(), cancellationTransaction.getId());
+        // Créer la réponse avant la suppression
+        CancelTransactionResponseDto response = CancelTransactionResponseDto.builder()
+                .transactionId(transaction.getId())
+                .status(TransactionStatus.ANNULE)
+                .montantRembourse(transferAmount)
+                .fraisRembourses(transferFee)
+                .expediteur(sender.getNomComplet())
+                .destinataire(recipient.getNomComplet())
+                .motifAnnulation(cancelRequest.getMotifAnnulation())
+                .dateAnnulation(now)
+                .message("Transaction annulée et supprimée avec succès")
+                .build();
 
-        return createCancellationResponse(transaction, cancellationTransaction, sender, recipient);
+        // Supprimer la transaction
+        log.info("Suppression de la transaction avec l'ID: {}", transaction.getId());
+        transactionRepository.delete(transaction);
+
+        log.info("Transfert annulé et supprimé avec succès, ID de transaction: {}", transaction.getId());
+
+        return response;
     }
-
     private Transaction createCancellationTransaction(Transaction originalTransaction, LocalDateTime now) {
         Transaction cancellationTransaction = new Transaction();
 
@@ -311,6 +317,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+    public class InsufficientBalanceException extends RuntimeException {
+        public InsufficientBalanceException(String message) {
+            super(message);
+        }
+    }
+
+
     @Transactional
     @Override
     public List<TransferResponseDto> multipleTransfer(MultipleTransferRequestDto requestDto) {
@@ -348,10 +361,11 @@ public class TransactionServiceImpl implements TransactionService {
 
             // Vérification du solde
             if (sender.getSolde().compareTo(totalAmount) < 0) {
-                throw new IllegalArgumentException(String.format(
+                throw new InsufficientBalanceException(String.format(
                         "Solde insuffisant pour effectuer tous les transferts. Nécessaire: %s, Disponible: %s",
                         totalAmount, sender.getSolde()));
             }
+
 
             // Traitement des transferts
             List<TransferResponseDto> responses = new ArrayList<>();
