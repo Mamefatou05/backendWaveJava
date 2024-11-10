@@ -1,5 +1,6 @@
 package com.backendwave.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -17,6 +18,7 @@ public class CodeVerification extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JsonBackReference
     private Utilisateur utilisateur;
 
     @Column(nullable = false, length = 6)

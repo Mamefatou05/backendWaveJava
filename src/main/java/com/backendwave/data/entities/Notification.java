@@ -2,6 +2,7 @@ package com.backendwave.data.entities;
 
 import com.backendwave.data.enums.NotificationType;
 import com.backendwave.data.enums.TransactionType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import lombok.Data;
@@ -14,6 +15,7 @@ public class Notification extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JsonBackReference
     private Utilisateur utilisateur;
 
     @Column(nullable = false, length = 100)

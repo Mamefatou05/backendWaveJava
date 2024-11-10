@@ -1,5 +1,6 @@
 package com.backendwave.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class Plafond extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JsonBackReference
     private Utilisateur utilisateur;
 
     @Column(nullable = false, precision = 15, scale = 2)

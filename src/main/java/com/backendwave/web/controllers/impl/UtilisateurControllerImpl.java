@@ -4,6 +4,7 @@ import com.backendwave.web.controllers.UtilisateurController;
 import com.backendwave.data.entities.Utilisateur;
 import com.backendwave.services.UtilisateurService;
 import com.backendwave.web.dto.request.users.CreateClientDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -85,11 +86,13 @@ public class UtilisateurControllerImpl implements UtilisateurController {
        return utilisateurService.findActiveUsers();
    }
 
+    @Override
     @GetMapping("/profile")
-    public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String authHeader) {
-        // Extraire le token du header Authorization
+    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
+       System.out.println("aettzaia");
+        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7); // Enlever "Bearer "
+            String token = authHeader.substring(7);
             try {
                 Utilisateur currentUser = utilisateurService.getCurrentUser(token);
                 return ResponseEntity.ok(currentUser);
@@ -97,7 +100,7 @@ public class UtilisateurControllerImpl implements UtilisateurController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token invalide");
             }
         }
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token manquant");
     }
+
 }

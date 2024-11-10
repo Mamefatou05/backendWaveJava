@@ -1,6 +1,7 @@
 package com.backendwave.data.entities;
 
 import com.backendwave.data.enums.Periodicity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -12,11 +13,14 @@ import java.time.LocalTime;
 public class PlanificationTransfert extends BaseEntity {
 
     @ManyToOne
+
     @JoinColumn(nullable = false)
+    @JsonBackReference
     private Utilisateur expediteur;
 
     @ManyToOne
     @JoinColumn(nullable = false)
+    @JsonBackReference
     private Utilisateur destinataire;
 
     @Column(nullable = false, precision = 15, scale = 2)
