@@ -7,7 +7,6 @@ WORKDIR /app
 # Copier le fichier pom.xml et télécharger les dépendances
 COPY pom.xml .
 
-COPY ./settings.xml /root/.m2/settings.xml
 
 
 # Copier tout le projet dans le conteneur
