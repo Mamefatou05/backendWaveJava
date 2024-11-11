@@ -1,7 +1,6 @@
 package com.backendwave.web.dto.request.users;
 
 
-import com.mfn.mydependance.interfaces.LoginDep;
 import lombok.*;
 
 @Setter

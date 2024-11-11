@@ -1,9 +1,10 @@
 package com.backendwave.web.controllers.impl;
 
+import com.backendwave.services.AuthService;
+import com.backendwave.services.TokenService;
 import com.backendwave.web.dto.response.JwtAuthenticationResponse;
 import com.backendwave.web.dto.request.users.Login;
-import com.mfn.mydependance.services.AuthService;
-import com.mfn.mydependance.services.TokenService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,7 +36,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new JwtAuthenticationResponse(accessToken));
     }
-
 //    @PostMapping("/login/refresh")
 //    public ResponseEntity<?> refreshToken(@RequestParam String refreshToken) {
 //        if (!jwtTokenService.validateToken(refreshToken)) {

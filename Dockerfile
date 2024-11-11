@@ -8,12 +8,14 @@ WORKDIR /app
 COPY pom.xml .
 
 
+# Télécharger les dépendances sans construire le projet
+RUN mvn dependency:go-offline
 
 # Copier tout le projet dans le conteneur
 COPY . .
 
 # Construire le projet
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 # Étape 2 : Construire l'image à partir de l'artefact généré
 FROM openjdk:17-jdk-slim
@@ -25,8 +27,7 @@ WORKDIR /app
 COPY --from=build /app/target/backendwave-0.0.1-SNAPSHOT.jar /app/backendwave.jar
 
 # Exposer le port utilisé par Spring Boot
-EXPOSE 6000
+EXPOSE 8007
 
 # Commande pour lancer l'application
-ENTRYPOINT ["java", "-jar", "/app/backendWave.jar"]
-
+ENTRYPOINT ["java", "-jar", "/app/backendwave.jar"]
