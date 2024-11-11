@@ -22,10 +22,10 @@ public class PlanificationScheduler {
     @Scheduled(cron = "*/1 * * * * ?")
     public void executeScheduledTransactions() {
        // System.out.println("azerty dans je scheduledTransactions");
-//        System.out.printf(String.valueOf(LocalDateTime.now()));
+        System.out.printf(String.valueOf(LocalDateTime.now()));
 
         List<PlanificationTransfert> planifications = planificationRepository.findByProchaineExecutionBeforeAndEstActif(LocalDateTime.now());
-//        System.out.printf(planifications.toString());
+        System.out.printf(planifications.toString());
         for (PlanificationTransfert planification : planifications) {
             planificationTransfertService.traiterPlanification(planification);
         }
