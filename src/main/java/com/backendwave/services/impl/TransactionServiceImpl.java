@@ -108,7 +108,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Calcul des frais
         BigDecimal transferFee = calculateTransferFee(transferRequestDto.getAmount());
-        BigDecimal totalAmount = transferRequestDto.getAmount().add(transferFee);
+        BigDecimal totalAmount = transferRequestDto.getAmount().subtract(transferFee);
 
         // Vérification du solde
         transactionValidator.validateSolde(sender.getSolde(), transferRequestDto.getAmount(), transferFee);
@@ -125,8 +125,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = createTransaction(transferRequestDto, sender, recipient, transferFee);
 
         // Mise à jour des soldes
-        BigDecimal newSenderBalance = sender.getSolde().subtract(totalAmount);
-        BigDecimal newRecipientBalance = recipient.getSolde().add(transferRequestDto.getAmount());
+        BigDecimal newSenderBalance = sender.getSolde().subtract(transferRequestDto.getAmount());
+        BigDecimal newRecipientBalance = recipient.getSolde().add(totalAmount);
 
         sender.setSolde(newSenderBalance);
         recipient.setSolde(newRecipientBalance);
